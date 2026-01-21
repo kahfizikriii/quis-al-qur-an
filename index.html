@@ -39,9 +39,12 @@
     </div>
 
     <div id="quiz-container" class="container">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold;">
-            <span id="surah-info-text" style="color: #FFD700;">Surat ...</span>
-            <span>Skor: <span id="score-val">0</span></span>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <button id="home-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: 0.3s;">🏠 Beranda</button>
+            <span style="font-weight: bold;">Skor: <span id="score-val">0</span></span>
+        </div>
+        <div style="text-align: center; margin-bottom: 15px; font-weight: bold;">
+            <span id="surah-info-text" style="color: #FFD700; font-size: 1.1em;">Surat ...</span>
         </div>
         <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
         
@@ -70,11 +73,13 @@
         const playBtn = document.getElementById('play-audio-btn');
         const audioPlayer = document.getElementById('quran-audio');
         const arabicDisplay = document.getElementById('arabic-display');
+        const homeBtn = document.getElementById('home-btn');
         
         let gameMode = 'tebak'; 
         let currentQuestion = 0;
         let score = 0;
         let quizQuestions = [];
+        let nextTimer = null;
 
         // Pilih Mode
         document.getElementById('mode-tebak').onclick = function() {
@@ -188,6 +193,16 @@
             });
         }
 
+        homeBtn.onclick = () => {
+            if(nextTimer) clearTimeout(nextTimer);
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            document.getElementById('quiz-container').classList.remove('active');
+            document.getElementById('login-container').classList.add('active');
+            currentQuestion = 0;
+            score = 0;
+        };
+
         playBtn.onclick = () => {
             audioPlayer.play();
             playBtn.innerHTML = "<span>🔊</span> Sedang Memutar...";
@@ -212,7 +227,7 @@
                 allBtns.forEach(b => { if(b.innerText === correct) b.classList.add('correct'); });
             }
 
-            setTimeout(() => {
+            nextTimer = setTimeout(() => {
                 currentQuestion++;
                 if (currentQuestion < 10) renderQuestion();
                 else showFinal();
