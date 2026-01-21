@@ -1,0 +1,21 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+body { background: #0c3b2e; color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+.container { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 30px; width: 100%; max-width: 650px; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.container.active { display: block; }
+h1 { text-align: center; color: #FFD700; margin-bottom: 20px; }
+.arabic-text { font-size: 2em; text-align: right; margin: 15px 0; color: #FFD700; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 12px; direction: rtl; }
+.translation-text { font-size: 1em; color: #ccc; font-style: italic; margin-bottom: 20px; padding: 10px; border-left: 4px solid #4CAF50; }
+.audio-btn { background: #4CAF50; border: none; padding: 12px 20px; border-radius: 50px; color: white; cursor: pointer; margin: 10px auto; display: block; font-weight: bold; }
+#answers-container { display: grid; gap: 10px; }
+.answer-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 15px; border-radius: 10px; cursor: pointer; text-align: right; }
+.answer-btn:hover { background: rgba(255,255,255,0.2); }
+.answer-btn.correct { background: #2e7d32 !important; }
+.answer-btn.incorrect { background: #c62828 !important; }
+.input-field { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); border-radius: 10px; color: white; font-size: 1em; outline: none; transition: 0.3s; }
+.input-field:focus { border-color: #FFD700; background: rgba(0,0,0,0.4); }
+.btn-main { width: 100%; padding: 15px; background: #FFD700; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: #0c3b2e; }
+.progress-bar { background: #FFD700; height: 8px; width: 0%; transition: 0.4s; border-radius: 5px; }
+.loading { text-align: center; color: #FFD700; display: none; margin-top: 10px; }
+/* Helper untuk tombol beranda */
+.btn-home { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: 0.3s; }
+.btn-home:hover { background: rgba(255,255,255,0.3); }

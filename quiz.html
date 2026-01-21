@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Al - Qur'an - Mulai</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Loading Container -->
+    <div id="loading-container" class="container active">
+        <h1>Memuat...</h1>
+        <div id="loading-msg" class="loading" style="display:block;">Menyiapkan ayat pilihan... ✨</div>
+    </div>
+
+    <!-- Quiz Container -->
+    <div id="quiz-container" class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <button id="home-btn" class="btn-home">🏠 Beranda</button>
+            <span style="font-weight: bold;">Skor: <span id="score-val">0</span></span>
+        </div>
+        <div style="text-align: center; margin-bottom: 15px; font-weight: bold;">
+            <span id="surah-info-text" style="color: #FFD700; font-size: 1.1em;">Surat ...</span>
+        </div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+        
+        <div class="arabic-text" id="arabic-display"></div>
+        
+        <button id="play-audio-btn" class="audio-btn"><span>▶</span> Putar Suara Ayat</button>
+        <audio id="quran-audio" style="display:none;"></audio>
+
+        <div class="translation-text" id="translation-display"></div>
+        <p id="question-label" style="margin-bottom: 15px; text-align: center; color: #FFD700; font-weight: bold;"></p>
+        
+        <div id="answers-container"></div>
+    </div>
+
+    <!-- Result Container -->
+    <div id="result-container" class="container">
+        <h1>Hasil Akhir</h1>
+        <div style="font-size: 5em; text-align: center; color: #FFD700;" id="final-score">0</div>
+        <p id="final-msg" style="text-align: center; margin-bottom: 25px; font-size: 1.2em;"></p>
+        <button onclick="location.reload()" class="btn-main">Coba Lagi</button>
+        <button onclick="window.location.href='index.html'" class="btn-main" style="margin-top: 10px; background: rgba(255,255,255,0.2); color: white;">Kembali ke Beranda</button>
+    </div>
+
+    <script src="quiz.js"></script>
+</body>
+</html>

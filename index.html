@@ -4,26 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kuis Al - Qur'an </title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0c3b2e; color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-        .container { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 30px; width: 100%; max-width: 650px; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .container.active { display: block; }
-        h1 { text-align: center; color: #FFD700; margin-bottom: 20px; }
-        .arabic-text { font-size: 2em; text-align: right; margin: 15px 0; color: #FFD700; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 12px; direction: rtl; }
-        .translation-text { font-size: 1em; color: #ccc; font-style: italic; margin-bottom: 20px; padding: 10px; border-left: 4px solid #4CAF50; }
-        .audio-btn { background: #4CAF50; border: none; padding: 12px 20px; border-radius: 50px; color: white; cursor: pointer; margin: 10px auto; display: block; font-weight: bold; }
-        #answers-container { display: grid; gap: 10px; }
-        .answer-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 15px; border-radius: 10px; cursor: pointer; text-align: right; }
-        .answer-btn:hover { background: rgba(255,255,255,0.2); }
-        .answer-btn.correct { background: #2e7d32 !important; }
-        .answer-btn.incorrect { background: #c62828 !important; }
-        .input-field { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); border-radius: 10px; color: white; font-size: 1em; outline: none; transition: 0.3s; }
-        .input-field:focus { border-color: #FFD700; background: rgba(0,0,0,0.4); }
-        .btn-main { width: 100%; padding: 15px; background: #FFD700; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; color: #0c3b2e; }
-        .progress-bar { background: #FFD700; height: 8px; width: 0%; transition: 0.4s; border-radius: 5px; }
-        .loading { text-align: center; color: #FFD700; display: none; margin-top: 10px; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -35,53 +16,11 @@
             <button class="btn-main" id="mode-sambung" style="background: rgba(255,255,255,0.1); color: white;">Sambung Ayat</button>
         </div>
         <button id="login-btn" class="btn-main">Mulai Kuis</button>
-        <div id="loading-msg" class="loading">Menyiapkan ayat pilihan... ✨</div>
-    </div>
-
-    <div id="quiz-container" class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <button id="home-btn" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-size: 0.9em; transition: 0.3s;">🏠 Beranda</button>
-            <span style="font-weight: bold;">Skor: <span id="score-val">0</span></span>
-        </div>
-        <div style="text-align: center; margin-bottom: 15px; font-weight: bold;">
-            <span id="surah-info-text" style="color: #FFD700; font-size: 1.1em;">Surat ...</span>
-        </div>
-        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
-        
-        <div class="arabic-text" id="arabic-display"></div>
-        
-        <button id="play-audio-btn" class="audio-btn">
-            <span>▶</span> Putar Suara Ayat
-        </button>
-        <audio id="quran-audio" style="display:none;"></audio>
-
-        <div class="translation-text" id="translation-display"></div>
-        <p id="question-label" style="margin-bottom: 15px; text-align: center; color: #FFD700; font-weight: bold;"></p>
-        
-        <div id="answers-container"></div>
-    </div>
-
-    <div id="result-container" class="container">
-        <h1>Hasil Akhir</h1>
-        <div style="font-size: 5em; text-align: center; color: #FFD700;" id="final-score">0</div>
-        <p id="final-msg" style="text-align: center; margin-bottom: 25px; font-size: 1.2em;"></p>
-        <button onclick="location.reload()" class="btn-main">Coba Lagi</button>
     </div>
 
     <script>
-        const loginBtn = document.getElementById('login-btn');
-        const playBtn = document.getElementById('play-audio-btn');
-        const audioPlayer = document.getElementById('quran-audio');
-        const arabicDisplay = document.getElementById('arabic-display');
-        const homeBtn = document.getElementById('home-btn');
-        
-        let gameMode = 'tebak'; 
-        let currentQuestion = 0;
-        let score = 0;
-        let quizQuestions = [];
-        let nextTimer = null;
+        let gameMode = 'tebak';
 
-        // Pilih Mode
         document.getElementById('mode-tebak').onclick = function() {
             gameMode = 'tebak';
             this.style.background = '#FFD700'; this.style.color = '#0c3b2e';
@@ -95,164 +34,11 @@
             document.getElementById('mode-tebak').style.color = 'white';
         };
 
-        async function fetchQuizData() {
-            document.getElementById('loading-msg').style.display = 'block';
-            try {
-                const resList = await fetch('https://equran.id/api/v2/surat');
-                const listData = await resList.json();
-                const allSurahs = listData.data;
-
-                quizQuestions = [];
-                for(let i=0; i<10; i++) {
-                    const randomSurah = allSurahs[Math.floor(Math.random() * allSurahs.length)];
-                    const resDetail = await fetch(`https://equran.id/api/v2/surat/${randomSurah.nomor}`);
-                    const detailData = await resDetail.json();
-                    const detail = detailData.data;
-                    const ayatList = detail.ayat;
-
-                    // Logika pengambilan ayat
-                    const maxIdx = gameMode === 'sambung' ? ayatList.length - 2 : ayatList.length - 1;
-                    const idx = Math.floor(Math.random() * (maxIdx + 1));
-                    const target = ayatList[idx];
-
-                    if (gameMode === 'tebak') {
-                        quizQuestions.push({
-                            surahName: detail.namaLatin,
-                            arabic: target.teksArab,
-                            trans: target.teksIndonesia,
-                            audio: target.audio['01'],
-                            correct: `Ayat ${target.nomorAyat}`,
-                            options: shuffle([
-                                `Ayat ${target.nomorAyat}`,
-                                `Ayat ${getRand(1, detail.jumlahAyat, target.nomorAyat)}`,
-                                `Ayat ${getRand(1, detail.jumlahAyat, target.nomorAyat)}`,
-                                `Ayat ${getRand(1, detail.jumlahAyat, target.nomorAyat)}`
-                            ])
-                        });
-                    } else {
-                        const next = ayatList[idx+1];
-                        quizQuestions.push({
-                            surahName: detail.namaLatin,
-                            arabic: target.teksArab,
-                            trans: target.teksIndonesia,
-                            audio: target.audio['01'],
-                            correct: next.teksArab,
-                            options: shuffle([
-                                next.teksArab,
-                                ayatList[Math.floor(Math.random()*ayatList.length)].teksArab,
-                                ayatList[Math.floor(Math.random()*ayatList.length)].teksArab,
-                                ayatList[Math.floor(Math.random()*ayatList.length)].teksArab
-                            ])
-                        });
-                    }
-                }
-                startQuiz();
-            } catch (err) {
-                console.error(err);
-                alert("Gagal mengambil data. Pastikan internet Anda aktif.");
-            } finally {
-                document.getElementById('loading-msg').style.display = 'none';
-            }
-        }
-
-        function startQuiz() {
-            document.getElementById('login-container').classList.remove('active');
-            document.getElementById('quiz-container').classList.add('active');
-            renderQuestion();
-        }
-
-        function renderQuestion() {
-            const data = quizQuestions[currentQuestion];
-            document.getElementById('surah-info-text').innerText = `Surat ${data.surahName}`;
-            arabicDisplay.innerText = data.arabic;
-            document.getElementById('translation-display').innerHTML = `<strong style="display:block; margin-bottom:8px; color:#4CAF50; font-style:normal;">Terjemahan:</strong> ${data.trans}`;
-            document.getElementById('progress-bar').style.width = `${(currentQuestion + 1) * 10}%`;
-            
-            // Logika Sembunyikan/Tampilkan Arab
-            if (gameMode === 'sambung') {
-                arabicDisplay.style.display = 'block';
-                document.getElementById('question-label').innerText = "Dengarkan suara & pilih kelanjutan ayatnya:";
-            } else {
-                arabicDisplay.style.display = 'block';
-                document.getElementById('question-label').innerText = "Berdasarkan ayat di atas, ayat berapakah ini?";
-            }
-            
-            audioPlayer.src = data.audio;
-            playBtn.innerHTML = "<span>▶</span> Putar Suara Ayat";
-            playBtn.disabled = false;
-
-            const container = document.getElementById('answers-container');
-            container.innerHTML = '';
-            data.options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'answer-btn';
-                if (gameMode === 'sambung') btn.classList.add('arabic-mode');
-                btn.innerText = opt;
-                btn.onclick = () => handleAnswer(opt, data.correct, btn);
-                container.appendChild(btn);
-            });
-        }
-
-        homeBtn.onclick = () => {
-            if(nextTimer) clearTimeout(nextTimer);
-            audioPlayer.pause();
-            audioPlayer.currentTime = 0;
-            document.getElementById('quiz-container').classList.remove('active');
-            document.getElementById('login-container').classList.add('active');
-            currentQuestion = 0;
-            score = 0;
-        };
-
-        playBtn.onclick = () => {
-            audioPlayer.play();
-            playBtn.innerHTML = "<span>🔊</span> Sedang Memutar...";
-            playBtn.disabled = true;
-            audioPlayer.onended = () => {
-                playBtn.innerHTML = "<span>▶</span> Putar Ulang";
-                playBtn.disabled = false;
-            };
-        };
-
-        function handleAnswer(selected, correct, btn) {
-            audioPlayer.pause();
-            const allBtns = document.querySelectorAll('.answer-btn');
-            allBtns.forEach(b => b.disabled = true);
-
-            if (selected === correct) {
-                btn.classList.add('correct');
-                score += 10;
-                document.getElementById('score-val').innerText = score;
-            } else {
-                btn.classList.add('incorrect');
-                allBtns.forEach(b => { if(b.innerText === correct) b.classList.add('correct'); });
-            }
-
-            nextTimer = setTimeout(() => {
-                currentQuestion++;
-                if (currentQuestion < 10) renderQuestion();
-                else showFinal();
-            }, 1800);
-        }
-
-        function showFinal() {
-            document.getElementById('quiz-container').classList.remove('active');
-            document.getElementById('result-container').classList.add('active');
-            document.getElementById('final-score').innerText = score;
-            document.getElementById('final-msg').innerText = score >= 70 ? "MasyaAllah! Hafalanmu sangat bagus. pertahankan ya!😊" : "Semangat! Teruslah membaca dan menghafal.";
-        }
-
-        // Fungsi pembantu
-        function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
-        function getRand(min, max, exc) {
-            if (max <= 1) return 1;
-            let r = Math.floor(Math.random() * (max - min + 1)) + min;
-            return r === exc ? getRand(min, max, exc) : r;
-        }
-
-        loginBtn.onclick = () => {
+        document.getElementById('login-btn').onclick = () => {
             const user = document.getElementById('username').value;
             if(!user) return alert("Silakan isi nama Anda terlebih dahulu.");
-            fetchQuizData();
+            // Redirect ke halaman quiz dengan parameter
+            window.location.href = `quiz.html?username=${encodeURIComponent(user)}&mode=${gameMode}`;
         };
     </script>
 </body>
