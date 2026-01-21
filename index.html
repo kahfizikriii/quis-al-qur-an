@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Al - Qur'an </title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body { background: linear-gradient(135deg, #0c3b2e 0%, #1a5c48 100%); color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        
+        .container { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 30px; width: 100%; max-width: 650px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); display: none; }
+        .container.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { text-align: center; margin-bottom: 25px; color: #FFD700; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+        
+        /* Area Soal */
+        .arabic-text { font-family: 'Amiri', serif; font-size: 2.4em; text-align: right; margin: 15px 0; line-height: 2.2; color: #FFD700; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 12px; border-right: 5px solid #FFD700; direction: rtl; word-wrap: break-word; }
+        .translation-text { font-size: 1.1em; line-height: 1.6; margin-bottom: 20px; color: #e6e6e6; font-style: italic; padding: 15px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; border-left: 5px solid #4CAF50; }
+        
+        /* Audio Control */
+        .audio-btn { background: #4CAF50; border: none; padding: 12px 25px; border-radius: 50px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin: 15px auto; font-weight: bold; transition: 0.3s; width: fit-content; }
+        .audio-btn:hover { background: #45a049; transform: scale(1.05); }
+        .audio-btn:disabled { background: #888; cursor: not-allowed; }
+
+        /* Jawaban */
+        #answers-container { display: grid; gap: 12px; margin-bottom: 25px; }
+        .answer-btn { background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.2); color: white; padding: 18px; border-radius: 12px; cursor: pointer; transition: 0.2s; text-align: right; font-size: 1.1em; }
+        .answer-btn.arabic-mode { font-family: 'Amiri', serif; font-size: 1.6em; line-height: 1.8; }
+        .answer-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.2); border-color: #FFD700; }
+        .answer-btn.correct { background: rgba(76, 175, 80, 0.8) !important; border-color: #4CAF50; }
+        .answer-btn.incorrect { background: rgba(244, 67, 54, 0.8) !important; border-color: #F44336; }
+        
+        /* Progress & Loading */
+        .progress-container { background: rgba(255,255,255,0.1); height: 10px; border-radius: 10px; margin-bottom: 20px; overflow: hidden; }
+        .progress-bar { background: #FFD700; height: 100%; width: 0%; transition: 0.5s; }
+        .loading { text-align: center; color: #FFD700; margin-top: 15px; font-weight: bold; display: none; }
+
+        /* Input & Main Buttons */
+        .input-field { width: 100%; padding: 15px; border-radius: 10px; border: none; margin-bottom: 20px; background: rgba(255,255,255,0.15); color: white; font-size: 1em; outline: none; }
+        .btn-main { width: 100%; padding: 16px; background: #FFD700; border: none; border-radius: 12px; color: #0c3b2e; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-main:hover { background: #ffea00; }
+    </style>
+</head>
+<body>
+
+    <div id="login-container" class="container active">
+        <h1>مسابقة القرآن</h1>
+        <input type="text" id="username" class="input-field" placeholder="Masukkan nama Anda...">
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="btn-main" id="mode-tebak" style="background: #FFD700; color: #0c3b2e;">Tebak Ayat</button>
+            <button class="btn-main" id="mode-sambung" style="background: rgba(255,255,255,0.1); color: white;">Sambung Ayat</button>
+        </div>
+        <button id="login-btn" class="btn-main">Mulai Kuis</button>
+        <div id="loading-msg" class="loading">Menyiapkan ayat pilihan... ✨</div>
+    </div>
+
+    <div id="quiz-container" class="container">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold;">
+            <span id="surah-info-text" style="color: #FFD700;">Surat ...</span>
+            <span>Skor: <span id="score-val">0</span></span>
+        </div>
+        <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+        
+        <div class="arabic-text" id="arabic-display"></div>
+        
+        <button id="play-audio-btn" class="audio-btn">
+            <span>▶</span> Putar Suara Ayat
+        </button>
+        <audio id="quran-audio" style="display:none;"></audio>
+
+        <div class="translation-text" id="translation-display"></div>
+        <p id="question-label" style="margin-bottom: 15px; text-align: center; color: #FFD700; font-weight: bold;"></p>
+        
+        <div id="answers-container"></div>
+    </div>
+
+    <div id="result-container" class="container">
+        <h1>Hasil Akhir</h1>
+        <div style="font-size: 5em; text-align: center; color: #FFD700;" id="final-score">0</div>
+        <p id="final-msg" style="text-align: center; margin-bottom: 25px; font-size: 1.2em;"></p>
+        <button onclick="location.reload()" class="btn-main">Coba Lagi</button>
+    </div>
+
+    <script>
+        const loginBtn = document.getElementById('login-btn');
+        const playBtn = document.getElementById('play-audio-btn');
+        const audioPlayer = document.getElementById('quran-audio');
+        const arabicDisplay = document.getElementById('arabic-display');
+        
+        let gameMode = 'tebak'; 
+        let currentQuestion = 0;
+        let score = 0;
+        let quizQuestions = [];
+
+        // Pilih Mode
+        document.getElementById('mode-tebak').onclick = function() {
+            gameMode = 'tebak';
+            this.style.background = '#FFD700'; this.style.color = '#0c3b2e';
+            document.getElementById('mode-sambung').style.background = 'rgba(255,255,255,0.1)';
+            document.getElementById('mode-sambung').style.color = 'white';
+        };
+        document.getElementById('mode-sambung').onclick = function() {
+            gameMode = 'sambung';
+            this.style.background = '#FFD700'; this.style.color = '#0c3b2e';
+            document.getElementById('mode-tebak').style.background = 'rgba(255,255,255,0.1)';
+            document.getElementById('mode-tebak').style.color = 'white';
+        };
+
+        async function fetchQuizData() {
+            document.getElementById('loading-msg').style.display = 'block';
+            try {
+                const resList = await fetch('https://equran.id/api/v2/surat');
+                const listData = await resList.json();
+                const allSurahs = listData.data;
+
+                quizQuestions = [];
+                for(let i=0; i<10; i++) {
+                    const randomSurah = allSurahs[Math.floor(Math.random() * allSurahs.length)];
+                    const resDetail = await fetch(`https://equran.id/api/v2/surat/${randomSurah.nomor}`);
+                    const detailData = await resDetail.json();
+                    const detail = detailData.data;
+                    const ayatList = detail.ayat;
+
+                    // Logika pengambilan ayat
+                    const maxIdx = gameMode === 'sambung' ? ayatList.length - 2 : ayatList.length - 1;
+                    const idx = Math.floor(Math.random() * (maxIdx + 1));
+                    const target = ayatList[idx];
+
+                    if (gameMode === 'tebak') {
+                        quizQuestions.push({
+                            surahName: detail.namaLatin,
+                            arabic: target.teksArab,
+                            trans: target.teksIndonesia,
+                            audio: target.audio['01'],
+                            correct: `Ayat ${target.nomorAyat}`,
+                            options: shuffle([
+                                `Ayat ${target.nomorAyat}`,
+                                `Ayat ${getRand(1, detail.jumlahAyat, target.nomorAyat)}`,
+                                `Ayat ${getRand(1, detail.jumlahAyat, target.nomorAyat)}`,
+                                `Ayat ${getRand(1, detail.jumlahAyat, target.nomorAyat)}`
+                            ])
+                        });
+                    } else {
+                        const next = ayatList[idx+1];
+                        quizQuestions.push({
+                            surahName: detail.namaLatin,
+                            arabic: target.teksArab,
+                            trans: target.teksIndonesia,
+                            audio: target.audio['01'],
+                            correct: next.teksArab,
+                            options: shuffle([
+                                next.teksArab,
+                                ayatList[Math.floor(Math.random()*ayatList.length)].teksArab,
+                                ayatList[Math.floor(Math.random()*ayatList.length)].teksArab,
+                                ayatList[Math.floor(Math.random()*ayatList.length)].teksArab
+                            ])
+                        });
+                    }
+                }
+                startQuiz();
+            } catch (err) {
+                console.error(err);
+                alert("Gagal mengambil data. Pastikan internet Anda aktif.");
+            } finally {
+                document.getElementById('loading-msg').style.display = 'none';
+            }
+        }
+
+        function startQuiz() {
+            document.getElementById('login-container').classList.remove('active');
+            document.getElementById('quiz-container').classList.add('active');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const data = quizQuestions[currentQuestion];
+            document.getElementById('surah-info-text').innerText = `Surat ${data.surahName}`;
+            document.getElementById('translation-display').innerHTML = `<strong style="display:block; margin-bottom:8px; color:#4CAF50; font-style:normal;">Terjemahan:</strong> ${data.trans}`;
+            document.getElementById('progress-bar').style.width = `${(currentQuestion + 1) * 10}%`;
+            
+            // Logika Sembunyikan/Tampilkan Arab
+            if (gameMode === 'sambung') {
+                arabicDisplay.style.display = 'none';
+                document.getElementById('question-label').innerText = "Dengarkan suara & pilih kelanjutan ayatnya:";
+            } else {
+                arabicDisplay.style.display = 'none';
+                document.getElementById('question-label').innerText = "Berdasarkan terjemahan di atas, ayat berapakah ini?";
+            }
+            
+            audioPlayer.src = data.audio;
+            playBtn.innerHTML = "<span>▶</span> Putar Suara Ayat";
+            playBtn.disabled = false;
+
+            const container = document.getElementById('answers-container');
+            container.innerHTML = '';
+            data.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                if (gameMode === 'sambung') btn.classList.add('arabic-mode');
+                btn.innerText = opt;
+                btn.onclick = () => handleAnswer(opt, data.correct, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        playBtn.onclick = () => {
+            audioPlayer.play();
+            playBtn.innerHTML = "<span>🔊</span> Sedang Memutar...";
+            playBtn.disabled = true;
+            audioPlayer.onended = () => {
+                playBtn.innerHTML = "<span>▶</span> Putar Ulang";
+                playBtn.disabled = false;
+            };
+        };
+
+        function handleAnswer(selected, correct, btn) {
+            audioPlayer.pause();
+            const allBtns = document.querySelectorAll('.answer-btn');
+            allBtns.forEach(b => b.disabled = true);
+
+            if (selected === correct) {
+                btn.classList.add('correct');
+                score += 10;
+                document.getElementById('score-val').innerText = score;
+            } else {
+                btn.classList.add('incorrect');
+                allBtns.forEach(b => { if(b.innerText === correct) b.classList.add('correct'); });
+            }
+
+            setTimeout(() => {
+                currentQuestion++;
+                if (currentQuestion < 10) renderQuestion();
+                else showFinal();
+            }, 1800);
+        }
+
+        function showFinal() {
+            document.getElementById('quiz-container').classList.remove('active');
+            document.getElementById('result-container').classList.add('active');
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-msg').innerText = score >= 70 ? "Maa Shaa Allah! Hafalanmu sangat bagus." : "Semangat! Teruslah membaca dan menghafal.";
+        }
+
+        // Fungsi pembantu
+        function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+        function getRand(min, max, exc) {
+            if (max <= 1) return 1;
+            let r = Math.floor(Math.random() * (max - min + 1)) + min;
+            return r === exc ? getRand(min, max, exc) : r;
+        }
+
+        loginBtn.onclick = () => {
+            const user = document.getElementById('username').value;
+            if(!user) return alert("Silakan isi nama Anda terlebih dahulu.");
+            fetchQuizData();
+        };
+    </script>
+</body>
+</html>
